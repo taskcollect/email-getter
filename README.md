@@ -27,6 +27,10 @@ The `Microsoft.Exchange.WebServices.NETStandard` library is particularly importa
     * Headers
       * username (string) The users username, in form CURRIC\XXXXXX
       * password (string)
+    * Response Codes
+      * 400: The didn't provide enough information (credentials or amount)
+      * 500: The EWS call errored out yikes
+      * 200: Allgood
   
 Returns json in following format
 ```json
@@ -47,6 +51,10 @@ Returns json in following format
   * Headers
     * username (string) The useres username, in form CURRIC\XXXXXX
     * password (string)
+  * Response Codes
+      * 400: The didn't provide enough information (credentials or identifier)
+      * 500: The EWS call errored out yikes
+      * 200: Allgood
   
 Returns the string of the email body in html, usually very long
 
