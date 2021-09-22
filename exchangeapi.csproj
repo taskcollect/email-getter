@@ -1,0 +1,21 @@
+<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>exchangeapi</RootNamespace>
+    <OutputPath>./bin</OutputPath>
+    <OutputType>exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Exchange.WebServices.NETStandard" Version="1.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+  </ItemGroup>
+  <Target Name="Build">
+    <Csc Sources="./src/*.cs" />
+    <Csc Sources="./src/Models/*.cs"/>
+    <Csc Sources="./src/Controllers/*.cs"/>
+  </Target>
+  <Target Name="Clean">
+    <RemoveDir Directories="./obj ./bin" />
+  </Target>
+</Project>

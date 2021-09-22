@@ -1,0 +1,35 @@
+version: "3"
+services:
+  ewsapi:
+    # add services that this devcontainer depends on here
+    depends_on: [
+      # database
+    ]
+
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    
+    ports:
+      - "5000:5000"
+      # - "5001:5001"
+      # TODO(Patrick) - Get https working, right now internal port 5001 for https has nothing going to it
+    
+    build:
+      context: ./
+    
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:5000
+
+    command: ./bin/netcoreapp3.1/exchangeapi
+
+  # -- add any service below this line --
+
+  # database:
+  #   image: postgres
+  #   environment:
+  #     POSTGRES_USER: dev
+  #     POSTGRES_PASSWORD: dev
+  #     POSTGRES_DB: taskcollect
+  #   restart: always
