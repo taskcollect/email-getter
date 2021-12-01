@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Exchange.WebServices.Data;
 using Models;
+using Microsoft.Extensions.Logging;
 
 namespace exchangeapi {
     public class API {
@@ -19,8 +20,7 @@ namespace exchangeapi {
             service.Credentials =  new WebCredentials(user, pass);
 
             service.TraceEnabled = false; // For SOAP request tracing
-            // service.TraceFlags = TraceFlags.All; // No more tracing
-            service.Url = new Uri("https://webmail.gihs.sa.edu.au/ews/Exchange.asmx"); // Ews endpoint
+            service.Url = new Uri(Environment.GetEnvironmentVariable("EXCHANGE_URL")); // Ews endpoint
             // Grab the specified amount of items from the default inbox folder
             var items = await service.FindItems(new FolderId(WellKnownFolderName.Inbox), new ItemView(amount));
 
@@ -30,7 +30,8 @@ namespace exchangeapi {
             foreach (EmailMessage msg in items) {
                 // Parsing emailMessages
                 emails.Add(new Email() {Id = msg.Id.UniqueId, From = msg.From.Name, isRead = msg.IsRead,
-                                        Subject = msg.Subject,  TimeSent = msg.DateTimeSent.ToUniversalTime().Ticks});
+                                        Subject = msg.Subject,  TimeSent = ((DateTimeOffset)msg.DateTimeSent).ToUnixTimeSeconds()});
+                                        // Have to cast the DateTime object to DateTimeOffset because reasons
             }
             return emails.ToArray(); // Return as an array instead of list because reasons
         }
@@ -68,7 +69,7 @@ namespace exchangeapi {
         public static string Get_Body(string user, string pass, string id) {
             var task = getbody(user, pass, id);
             task.Wait();
-            return task.Result;
+            return task.Result; //sus
         }
     }
 }

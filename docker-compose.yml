@@ -20,6 +20,7 @@ services:
       context: ./
     
     environment:
+      - EXCHANGE_URL=https://webmail.gihs.sa.edu.au/ews/Exchange.asmx
       - ASPNETCORE_URLS=http://0.0.0.0:5000
 
     command: ./bin/netcoreapp3.1/exchangeapi

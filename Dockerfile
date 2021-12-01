@@ -15,6 +15,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 # Bind to 0.0.0.0 so it works
 ENV ASPNETCORE_URLS=http://0.0.0.0:5000
+ENV EXCHANGE_URL=https://webmail.gihs.sa.edu.au/ews/Exchange.asmx
 CMD ["./bin/netcoreapp3.1/exchangeapi"]
 
 # TODO(Patrick) - Figure out alpine image

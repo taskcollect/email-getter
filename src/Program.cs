@@ -17,6 +17,10 @@ namespace exchangeapi
 {
     public class Program
     {
+        private readonly ILogger _logger;
+        public Program(ILogger<Program> logger) {
+            _logger = logger;
+        }
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
@@ -28,6 +32,15 @@ namespace exchangeapi
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                })
+                .ConfigureLogging(logging => 
+                {
+                    logging.ClearProviders();  
+
+                    // add built-in providers manually, as needed 
+                    logging.AddConsole();   
+                    //logging.AddDebug();  
+                    //logging.AddEventSourceLogger();
                 });
     }
 }
