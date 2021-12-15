@@ -21,7 +21,7 @@ Even though you won't manually need to install these, the project depends on the
 The `Microsoft.Exchange.WebServices.NETStandard` library is particularly important as it is a fork of the Microsoft `Microsoft.Exchange.WebServices` library for .NET core, with some additional features such as async requests. The original library runs with .NET framework, not available on linux.
 
 ## HTTP Spec
-* GET /v1/email
+* GET /v1/mail
     * Query Parameters
       * amount (int) The number of emails to retrieve, sorted by most recent
     * Headers
