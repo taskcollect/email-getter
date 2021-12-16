@@ -34,7 +34,7 @@ namespace exchangeapi.Controllers
             if (!Request.Headers.Keys.Contains("Authorization")) {
                 Response.StatusCode = 401;
                 // Return bad request
-                return new JsonResult(new {message="Authentication Error", error="No email credentials were provided, use the username and password headers with username in format CURRIC\\XXXXXX"});
+                return new JsonResult(new {message="Authentication Error", error="No email credentials were provided, use HTTP basic auth"});
             }
             if (!Request.Headers["Authorization"].ToString().Contains("Basic")){
                 Response.StatusCode = 401;
@@ -74,7 +74,7 @@ namespace exchangeapi.Controllers
             if (!Request.Headers.Keys.Contains("Authorization")) {
                 Response.StatusCode = 401;
                 // Return bad request
-                return new JsonResult(new {message="Authentication Error", error="No email credentials were provided, use the username and password headers with username in format CURRIC\\XXXXXX"});
+                return new JsonResult(new {message="Authentication Error", error="No email credentials were provided, use HTTP basic auth"});
             }
             if (!Request.Headers["Authorization"].ToString().Contains("Basic")){
                 Response.StatusCode = 401;
