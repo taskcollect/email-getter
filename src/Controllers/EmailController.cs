@@ -54,7 +54,7 @@ namespace exchangeapi.Controllers
             }
             try {
                 Response.StatusCode = 200;
-                return new JsonResult(new {messages=exchange.getMail(creds[0], creds[1], amount)});
+                return new JsonResult(exchange.getMail(creds[0], creds[1], amount));
             } catch (ServiceRequestException e){
                 if (e.Message.Contains("(401) Unauthorized")) {
                     Response.StatusCode = 401;
@@ -99,7 +99,7 @@ namespace exchangeapi.Controllers
             }
             catch (Exception e) {
                 Response.StatusCode = 500;
-                return new JsonResult(new {message = "Internal Server Error", error=e.GetType().ToString()});
+                return new JsonResult(new {message = "Internal Server Error", error=e.Message});
             }
         }
     }

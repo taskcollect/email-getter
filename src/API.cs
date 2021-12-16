@@ -19,15 +19,18 @@ namespace exchangeapi {
         public API(EmailController controller) {
             _logger = controller._logger;
             service = new ExchangeService(ExchangeVersion.Exchange2013);
+            if (Environment.GetEnvironmentVariables().Contains("EXCHANGE_URL")) {
+                service.Url = new Uri(Environment.GetEnvironmentVariable("EXCHANGE_URL"));
+            } else {
+                service.Url = new Uri("https://outlook.office365.com/EWS/Exchange.asmx");
+                _logger.LogInformation("EXCHANGE_URL not set, using default: " + service.Url);
+            }
         }
 
         // The exchange library implements its own Task type which breaks it, so you need to manually refer the system type
         // Since our library web functions are async this function is async and returns a templated task of type email array
         public Email[] getMail(string user, string pass, int amount) {
             service.Credentials =  new WebCredentials(user, pass);
-
-            service.TraceEnabled = false; // For SOAP request tracing
-            service.Url = new Uri(Environment.GetEnvironmentVariable("EXCHANGE_URL")); // Ews endpoint
             // Grab the specified amount of items from the default inbox folder
             var task = service.FindItems(new FolderId(WellKnownFolderName.Inbox), new ItemView(amount));
             try {
@@ -52,10 +55,7 @@ namespace exchangeapi {
         }
         public string getBody(string user, string pass, string id) {
             // Same thing but getting body using email.Load(), takes along time because the body is big html
-            ExchangeService service= new ExchangeService(ExchangeVersion.Exchange2013);
             service.Credentials = new WebCredentials(user, pass);
-            service.TraceEnabled = false;
-            service.Url = new Uri(Environment.GetEnvironmentVariable("EXCHANGE_URL")); // Ews endpoint
             
             //  Only grab 1 email
             ItemView view = new ItemView(1);
