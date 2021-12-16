@@ -6,10 +6,12 @@ This is the api controller mapping routes to methods
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using Models;
+using exchangeapi.Models;
 using exchangeapi;
 using System;
 using Microsoft.Extensions.Logging;
+using Microsoft.Exchange.WebServices.Data;
+using System.Text;
 
 namespace exchangeapi.Controllers
 {
@@ -18,72 +20,86 @@ namespace exchangeapi.Controllers
     [Route("v1")] // 0.0.0.0/api
     public class EmailController: ControllerBase
     {
-        private readonly ILogger _logger;
+        public readonly ILogger _logger;
+        private API exchange;
         public EmailController(ILogger<EmailController> logger) {
             _logger = logger;
+            exchange = new API(this);
         }
 
         [HttpGet("mail")] // 0.0.0.0/api/mail?amount=X
         // Takes headers username and password
         public IActionResult Get(int amount)
         {
-            if (!Request.Headers.Keys.Contains("username") || !Request.Headers.Keys.Contains("password")) {
-                Response.StatusCode = 400;
+            if (!Request.Headers.Keys.Contains("Authorization")) {
+                Response.StatusCode = 401;
                 // Return bad request
-                return new JsonResult(new {status=400, message="Invalid Request", error="No email credentials were provided, use the username and password headers with username in format CURRIC\\XXXXXX"});
+                return new JsonResult(new {message="Authentication Error", error="No email credentials were provided, use the username and password headers with username in format CURRIC\\XXXXXX"});
+            }
+            if (!Request.Headers["Authorization"].ToString().Contains("Basic")){
+                Response.StatusCode = 401;
+                return new JsonResult(new {message = "Authentication Error", error = "Only basic authorization supported"});
             }
             if (amount == 0) {
                 Response.StatusCode = 400;
-                return new JsonResult(new {status=400, message= "Invalid Request", error="No amount of emails was requested, use the ?amount= query parameter"});
+                return new JsonResult(new {message= "Invalid Request", error="No amount of emails was requested, use the ?amount= query parameter"});
+            }
+
+            string auth_encoded = Request.Headers["Authorization"];
+            string auth = Encoding.UTF8.GetString(Convert.FromBase64String(auth_encoded.Substring(6)));
+            string[] creds = auth.Split(":");
+            if (creds.Length != 2) {
+                Response.StatusCode = 401;
+                return new JsonResult(new {message = "Authentication Error", error = "Malformed Authorization Header"});
             }
             try {
                 Response.StatusCode = 200;
-                return new JsonResult(new {status=200, messages=API.Get_Emails(Request.Headers["username"], Request.Headers["password"], amount)});
-            }
-            catch (System.AggregateException ae) {
-                _logger.LogError(ae.ToString());
-                if (ae.InnerException is Microsoft.Exchange.WebServices.Data.ServiceRequestException && ae.InnerException.Message == "The request failed. Name or service not known Name or service not known") {
-                     _logger.LogCritical("The Exchange server URL is invalid, set with EXCHANGE_URL environment variable");
-                     Response.StatusCode = 500;
-                     return new JsonResult(new {status = 500, message = "Internal Server Error", error = "Exchange Server URL Invalid"});
-                } 
-                else if (ae.InnerException is Microsoft.Exchange.WebServices.Data.ServiceRequestException && ae.InnerException.Message == "The request failed. The remote server returned an error: (401) Unauthorized.") {
+                return new JsonResult(new {messages=exchange.getMail(creds[0], creds[1], amount)});
+            } catch (ServiceRequestException e){
+                if (e.Message.Contains("(401) Unauthorized")) {
                     Response.StatusCode = 401;
-                    return new JsonResult(new {status = 401, message = "Authorization Error", error = "Invalid username or password"});
+                    return new JsonResult(new {message= "Authentication Error", error = "The username and password provided were invalid"});
                 }
-                else {
-                    _logger.LogError(ae.InnerException.ToString());
-                    Response.StatusCode = 500;
-                    // Return internal server error with the exception message
-                    return new JsonResult(new {status = 500, message = "Internal Server Error", error = "Something went wrong"});
-                }
-            }
-            catch (Exception e) {
+                return new JsonResult(new {sus = "sus"});
+            } catch (Exception e) {
                 _logger.LogError(e.ToString());
                 Response.StatusCode = 500;
                 // Return internal server error with the exception message
                 return new JsonResult(new {message = "Internal Server Error", error = "An Unhandled Internal Server Error Occured"});
             }
         }
-
         [HttpGet("body")] // 0.0.0.0/api/getbody?id=XXXXXXXXXXXX
         // The id is a long base64 string from Email.Id
         public IActionResult Get(string id) {
-            if (!Request.Headers.Keys.Contains("username") || !Request.Headers.Keys.Contains("password")) {
-                Response.StatusCode = 400;
-                return new JsonResult(new {message="Invalid Request", error="No email credentials were provided, use the username and password headers with username in format CURRIC\\XXXXXX"});
+            if (!Request.Headers.Keys.Contains("Authorization")) {
+                Response.StatusCode = 401;
+                // Return bad request
+                return new JsonResult(new {message="Authentication Error", error="No email credentials were provided, use the username and password headers with username in format CURRIC\\XXXXXX"});
+            }
+            if (!Request.Headers["Authorization"].ToString().Contains("Basic")){
+                Response.StatusCode = 401;
+                return new JsonResult(new {message = "Authentication Error", error = "Only basic authorization supported"});
             }
             if (id == null) {
                 Response.StatusCode = 400;
                 return new JsonResult(new {message= "Invalid Request", error="No email id was requests, use the ?id= query parameter"});
             }
+
+            string auth_encoded = Request.Headers["Authorization"];
+            string auth = Encoding.UTF8.GetString(Convert.FromBase64String(auth_encoded.Substring(6)));
+            string[] creds = auth.Split(":");
+            if (creds.Length != 2) {
+                Response.StatusCode = 401;
+                return new JsonResult(new {message = "Authentication Error", error = "Malformed Authorization Header"});
+            }
+
             try {
                 Response.StatusCode = 200;
-                return new JsonResult(API.Get_Body(Request.Headers["username"], Request.Headers["password"], id));
+                return new JsonResult(exchange.getBody(creds[0], creds[1], id));
             }
             catch (Exception e) {
                 Response.StatusCode = 500;
-                return new JsonResult(new {message = "Internal Server Error", error=e.Message});
+                return new JsonResult(new {message = "Internal Server Error", error=e.GetType().ToString()});
             }
         }
     }

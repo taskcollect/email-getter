@@ -24,13 +24,13 @@ The `Microsoft.Exchange.WebServices.NETStandard` library is particularly importa
 * GET /v1/mail
     * Query Parameters
       * amount (int) The number of emails to retrieve, sorted by most recent
-    * Headers
-      * username (string) The users username, in form CURRIC\XXXXXX
-      * password (string)
+    * HTTP Basic Auth
+      * Username in format CURRIC\XXXXXX, Password in normal string format
     * Response Codes
-      * 400: The didn't provide enough information (credentials or amount)
-      * 500: The EWS call errored out yikes
-      * 200: Allgood
+      * 401: Credentials were not provided, malformed, or invalid
+      * 400: Some query parameter was invalid or not provided
+      * 500: An unhandled exception occurred
+      * 200: The call was successful
   
 Returns json in following format
 ```json
@@ -48,15 +48,13 @@ Returns json in following format
 * GET /v1/body
   * Query Parameters
     * id (string) The unique identifier of the requested email
-  * Headers
-    * username (string) The useres username, in form CURRIC\XXXXXX
-    * password (string)
-  * Response Codes
-      * 400: The didn't provide enough information (credentials or identifier)
-      * 500: The EWS call errored out yikes
-      * 200: Allgood
-  
-Returns the string of the email body in html, usually very long
+    * HTTP Basic Auth
+      * Username in format CURRIC\XXXXXX, Password in normal string format
+    * Response Codes
+      * 401: Credentials were not provided, malformed, or invalid
+      * 400: Some query parameter was invalid or not provided
+      * 500: An unhandled exception occurred
+      * 200: The call was successful
 
 # TODOS
 * Speed up requests to EWS server, probably involves leveraging async stuff

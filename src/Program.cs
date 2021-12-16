@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Exchange.WebServices.Data;
-using Models;
+using exchangeapi.Models;
 
 namespace exchangeapi
 {
